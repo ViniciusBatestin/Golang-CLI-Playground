@@ -1,22 +1,27 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
+	"os"
+	"strings"
 )
 
+// Define the Animal interface
 type Animal interface {
 	Eat() string
 	Move() string
 	Speak() string
 }
 
+// Struct for Animal characteristics
 type Animals struct {
 	food       string
 	locomotion string
 	noise      string
 }
 
-// Food eaten methods
+// Implement the Animal interface for Animals struct
 func (a Animals) Eat() string {
 	return a.food
 }
@@ -29,68 +34,100 @@ func (a Animals) Speak() string {
 	return a.noise
 }
 
-// Cow design
-type Cow struct{ eat, move, speak string }
-
-func (c Cow) Eat() {
-	fmt.Println(c.eat)
+// Cow, Bird, and Snake struct types embed the Animals struct
+type Cow struct {
+	Animals
 }
 
-func (c Cow) Move() {
-	fmt.Println(c.move)
+type Bird struct {
+	Animals
 }
 
-func (c Cow) Speak() {
-	fmt.Println(c.speak)
+type Snake struct {
+	Animals
 }
 
-// Bird Design
-type Bird struct{ eat, move, speak string }
+// Create a map to store animals by name
+var animalsMap = make(map[string]Animal)
 
-func (b Bird) Eat() {
-	fmt.Println(b.eat)
+// Function to create a new animal based on user input
+func newAnimal(name string, animalType string) {
+	switch animalType {
+	case "cow":
+		animalsMap[name] = Cow{Animals{food: "grass", locomotion: "walk", noise: "moo"}}
+	case "bird":
+		animalsMap[name] = Bird{Animals{food: "worms", locomotion: "fly", noise: "peep"}}
+	case "snake":
+		animalsMap[name] = Snake{Animals{food: "mice", locomotion: "slither", noise: "hsss"}}
+	default:
+		fmt.Println("Unknown animal type!")
+		return
+	}
+	fmt.Println("Created it!")
 }
 
-func (b Bird) Move() {
-	fmt.Println(b.move)
-}
+// Function to query an animal's action
+func queryAnimal(name string, info string) {
+	animal, exists := animalsMap[name]
+	if !exists {
+		fmt.Println("Animal not found!")
+		return
+	}
 
-func (b Bird) Speak() {
-	fmt.Println(b.speak)
-}
-
-// Snake design
-type Snake struct{ eat, move, speak string }
-
-func (s Snake) Eat() {
-	fmt.Println(s.eat)
-}
-
-func (s Snake) Move() {
-	fmt.Println(s.move)
-}
-
-func (s Snake) Speak() {
-	fmt.Println(s.speak)
+	switch info {
+	case "eat":
+		fmt.Println(animal.Eat())
+	case "move":
+		fmt.Println(animal.Move())
+	case "speak":
+		fmt.Println(animal.Speak())
+	default:
+		fmt.Println("Unknown query! Available options are 'eat', 'move', or 'speak'.")
+	}
 }
 
 func main() {
-	cow := Animals{food: "grass", locomotion: "walk", noise: "moo"}
-	bird := Animals{food: "worms", locomotion: "fly", noise: "peep"}
-	snake := Animals{food: "mice", locomotion: "slither", noise: "hsss"}
+	// Set up a scanner to read user input
+	scanner := bufio.NewScanner(os.Stdin)
 
-	fmt.Println("Type a request")
-	fmt.Println(">")
-	// fmt.Println("reponse goes her")
+	fmt.Println("")
+	fmt.Println("Type 'newanimal' [name] [type]. to create a new animal")
+	fmt.Println("Type 'query' [name] [info]")
+
+	for {
+		// Display prompt
+		fmt.Print("> ")
+
+		// Read user input
+		scanner.Scan()
+		input := scanner.Text()
+
+		// Split the input into parts
+		parts := strings.Split(input, " ")
+
+		// Ensure at least 3 parts are provided in the input
+		if len(parts) != 3 {
+			fmt.Println("Invalid command. Please provide the correct input format.")
+			continue
+		}
+
+		// Process the 'newanimal' command
+		if parts[0] == "newanimal" {
+			name := parts[1]
+			animalType := parts[2]
+			newAnimal(name, animalType)
+
+			// Process the 'query' command
+		} else if parts[0] == "query" {
+			name := parts[1]
+			info := parts[2]
+			queryAnimal(name, info)
+
+		} else {
+			fmt.Println("Unknown command. Valid commands are 'newanimal' or 'query'.")
+		}
+	}
 }
-
-//*****
-//Define an interface type called Animal which describes the methods of an animal.
-//Specifically, the Animal interface should contain the methods Eat(), Move(), and Speak(), which take no arguments and return no values.
-//The Eat() method should print the animal’s food,
-//the Move() method should print the animal’s locomotion,
-//and the Speak() method should print the animal’s spoken sound.
-//Define three types Cow, Bird, and Snake. For each of these three types, define methods Eat(), Move(), and Speak() so that the types Cow, Bird, and Snake all satisfy the Animal interface.
 
 //When the user creates an animal, create an object of the appropriate type. Your program should call the appropriate method when the user issues a query command.
 
@@ -112,3 +149,11 @@ func main() {
 //2 - the name of the animal
 // - name of the information requested about the animal "eat" "move" "speak"
 // Print out the requested data
+
+//*****
+//Define an interface type called Animal which describes the methods of an animal.
+//Specifically, the Animal interface should contain the methods Eat(), Move(), and Speak(), which take no arguments and return no values.
+//The Eat() method should print the animal’s food,
+//the Move() method should print the animal’s locomotion,
+//and the Speak() method should print the animal’s spoken sound.
+//Define three types Cow, Bird, and Snake. For each of these three types, define methods Eat(), Move(), and Speak() so that the types Cow, Bird, and Snake all satisfy the Animal interface.
