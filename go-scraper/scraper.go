@@ -1,7 +1,9 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
+	"os"
 
 	"regexp"
 	"strings"
@@ -10,9 +12,9 @@ import (
 )
 
 type item struct {
-	name     string `json: "name"`
-	price    string `json: "price"`
-	imageURL string `json: "imgurl"`
+	Name     string `json:"name"`
+	Price    string `json:"price"`
+	ImageURL string `json:"imgurl"`
 }
 
 func extractImageURL(style string) string {
@@ -39,9 +41,9 @@ func main() {
 
 	c.OnHTML("div.grid-product__content", func(h *colly.HTMLElement) {
 		item := item{
-			name:     h.ChildText(".grid-product__title.grid-product__title--body"),
-			price:    h.ChildText(".grid-product__price"),
-			imageURL: extractImageURL(h.ChildAttr(".grid__image-ratio", "style")),
+			Name:     h.ChildText(".grid-product__title.grid-product__title--body"),
+			Price:    h.ChildText(".grid-product__price"),
+			ImageURL: extractImageURL(h.ChildAttr(".grid__image-ratio", "style")),
 		}
 		items = append(items, item)
 	})
@@ -63,4 +65,12 @@ func main() {
 		fmt.Println("Error visiting the page", err)
 	}
 	fmt.Println(items)
+
+	content, err := json.Marshal(items)
+
+	if err != nil {
+		fmt.Println(err.Error())
+	}
+
+	os.WriteFile("products.json", content, 0644)
 }
