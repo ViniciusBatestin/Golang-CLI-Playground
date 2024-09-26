@@ -20,7 +20,7 @@ func main() {
 		}
 	}() // Imediatelly invokes the function
 
-	// Goroiutine 2: Increments the shared var
+	// Goroutine 2: Increments the shared var
 	go func() {
 		for i := 0; i < 1000; i++ {
 			sharedVar++
