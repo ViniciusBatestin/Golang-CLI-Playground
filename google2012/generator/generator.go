@@ -19,7 +19,11 @@ func boring(msg string) <-chan string { // return receives-only channel of strin
 
 func main() {
 	c := boring("boring!") // function returning a channel
+	joe := boring("Joe")
+	ann := boring("Ann")
 	for i := 0; i < 5; i++ {
 		fmt.Printf("You say: %q\n", <-c)
+		fmt.Println(<-joe)
+		fmt.Println(<-ann)
 	}
 }
