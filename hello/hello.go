@@ -3,15 +3,11 @@ package main
 import (
 	"fmt"
 
-	"github.com/ViniciusBatestin/Golang-CLI-Playground/tree/master/greetings"
-
-	"rsc.io/quote"
+	"github.com/ViniciusBatestin/Golang-CLI-Playground/greetings"
 )
 
 func main() {
-	fmt.Println(quote.Go())
-
-	//Get a greeting message and prin it.
-	message := greetings.Hello("Vinnys")
+	// Get a greeting message and print it.
+	message := greetings.Hello("Gladys")
 	fmt.Println(message)
 }

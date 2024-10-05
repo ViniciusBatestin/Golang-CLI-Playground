@@ -2,9 +2,4 @@ module github.com/ViniciusBatestin/Golang-CLI-Playground/hello
 
 go 1.23.1
 
-require rsc.io/quote v1.5.2
-
-require (
-	golang.org/x/text v0.0.0-20170915032832-14c0d48ead0c // indirect
-	rsc.io/sampler v1.3.0 // indirect
-)
+require github.com/ViniciusBatestin/Golang-CLI-Playground/greetings v0.0.0-20241005152733-78a2c1ae31c2
