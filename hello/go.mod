@@ -1,4 +1,4 @@
-module example/hello
+module github.com/ViniciusBatestin/Golang-CLI-Playground/tree/master/hello
 
 go 1.23.1
 
