@@ -1,4 +1,4 @@
-module github.com/ViniciusBatestin/Golang-CLI-Playground/tree/master/hello
+module github.com/ViniciusBatestin/Golang-CLI-Playground/hello
 
 go 1.23.1
 

@@ -1,3 +1,3 @@
-module github.com/ViniciusBatestin/Golang-CLI-Playground/tree/master/greetings
+module github.com/ViniciusBatestin/Golang-CLI-Playground/greetings
 
 go 1.23.1
