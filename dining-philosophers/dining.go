@@ -2,103 +2,82 @@ package main
 
 import (
 	"fmt"
+	"sync"
 	"time"
 )
 
-type Chopstick struct {
-	id int
-}
-
+// Philosopher struct representing each philosopher
 type Philosopher struct {
 	id             int
-	leftChopstick  chan *Chopstick
-	rightChopstick chan *Chopstick
-	eatPermission  chan int
-	doneEating     chan int
+	leftChopstick  *sync.Mutex
+	rightChopstick *sync.Mutex
 }
 
+// Host struct to manage eating permissions
 type Host struct {
-	permission chan int
+	permission chan struct{} // A channel to limit eating permissions
 }
 
-func (p *Philosopher) eat() {
-	for i := 0; i < 3; i++ { // Each philosopher eats 3 times
-		// Request permission from the host to eat
-		p.eatPermission <- p.id
+// Function for the philosopher to start eating
+func (p *Philosopher) eat(host *Host, wg *sync.WaitGroup) {
+	defer wg.Done() // Signal that the philosopher has finished after 3 meals
 
-		// Pick up the chopsticks
-		leftChopstick := <-p.leftChopstick
-		rightChopstick := <-p.rightChopstick
+	for i := 0; i < 3; i++ {
+		// Request permission from the host to eat
+		host.permission <- struct{}{}
+
+		// Lock the chopsticks (pick them up)
+		p.leftChopstick.Lock()
+		p.rightChopstick.Lock()
 
 		// Start eating
 		fmt.Printf("starting to eat %d\n", p.id)
 		time.Sleep(time.Second) // Simulate eating time
 		fmt.Printf("finishing eating %d\n", p.id)
 
-		// Put down the chopsticks
-		p.leftChopstick <- leftChopstick
-		p.rightChopstick <- rightChopstick
+		// Unlock the chopsticks (put them down)
+		p.rightChopstick.Unlock()
+		p.leftChopstick.Unlock()
 
 		// Notify the host that the philosopher is done eating
-		p.doneEating <- p.id
-	}
-}
-
-func (h *Host) managePhilosophers(eatPermission chan int, doneEating chan int) {
-	eatingPhilosophers := 0
-
-	for {
-		select {
-		case philosopherID := <-eatPermission:
-			if eatingPhilosophers < 2 {
-				eatingPhilosophers++
-				fmt.Printf("Host allows philosopher %d to eat\n", philosopherID)
-			}
-
-		case philosopherID := <-doneEating:
-			eatingPhilosophers--
-			fmt.Printf("Host knows philosopher %d finished eating\n", philosopherID)
-		}
+		<-host.permission
 	}
 }
 
 func main() {
-	// Create chopstick channels (each chopstick is represented by a channel)
-	chopsticks := make([]chan *Chopstick, 5)
+	var wg sync.WaitGroup
+
+	// Create the host that manages permissions (allows 2 philosophers to eat at a time)
+	host := &Host{
+		permission: make(chan struct{}, 2),
+	}
+
+	// Create chopsticks (using mutex for each chopstick)
+	chopsticks := make([]*sync.Mutex, 5)
 	for i := 0; i < 5; i++ {
-		chopsticks[i] = make(chan *Chopstick, 1)
-		chopsticks[i] <- &Chopstick{id: i + 1} // Initialize each chopstick
+		chopsticks[i] = &sync.Mutex{}
 	}
 
-	// Create host
-	host := Host{
-		permission: make(chan int),
-	}
-
-	// Channels for communication between philosophers and the host
-	eatPermission := make(chan int)
-	doneEating := make(chan int)
-
-	// Create philosophers
+	// Create philosophers and assign them chopsticks
 	philosophers := make([]*Philosopher, 5)
 	for i := 0; i < 5; i++ {
 		philosophers[i] = &Philosopher{
 			id:             i + 1,
 			leftChopstick:  chopsticks[i],
 			rightChopstick: chopsticks[(i+1)%5],
-			eatPermission:  eatPermission,
-			doneEating:     doneEating,
 		}
 	}
 
-	// Start the host goroutine
-	go host.managePhilosophers(eatPermission, doneEating)
+	// Add philosophers to the wait group (one for each philosopher)
+	wg.Add(5)
 
 	// Start eating routines for each philosopher
 	for _, philosopher := range philosophers {
-		go philosopher.eat()
+		go philosopher.eat(host, &wg)
 	}
 
-	// Prevent the program from exiting too early
-	time.Sleep(10 * time.Second)
+	// Wait for all philosophers to finish their meals
+	wg.Wait()
+
+	fmt.Println("All philosophers have finished eating.")
 }
