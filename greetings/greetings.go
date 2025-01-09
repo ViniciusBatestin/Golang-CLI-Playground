@@ -13,6 +13,7 @@ func Hello(name string) (string, error) {
 		return name, errors.New("empty name")
 	}
 	// Create a message using a random format.
+	// message := fmt.Sprintf(randomFormat()) ***testing***
 	message := fmt.Sprintf(randomFormat(), name)
 	return message, nil
 }
